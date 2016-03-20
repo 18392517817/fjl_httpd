@@ -3,26 +3,26 @@ FIND_PATH=-I/home/eason/bit/myhttpd/sql_connect -I/home/eason/bit/myhttpd/sql_co
 .PHONY:all
 all: debug_cgi math_cgi div_cgi show_student_cgi register_cgi
 debug_cgi:debug_cgi.c
-	gcc -o $@ $^
+	@gcc -o $@ $^
 math_cgi:math_cgi.c
-	gcc -o $@ $^
+	@gcc -o $@ $^
 div_cgi:div_cgi.c
-	gcc -o $@ $^
+	@gcc -o $@ $^
 show_student_cgi:show_student_cgi.cpp /home/eason/bit/myhttpd/sql_connect/sql_connect.cpp 
-	g++ -o $@ $^ $(FIND_PATH) -g
+	@g++ -o $@ $^ $(FIND_PATH) -g
 
 register_cgi:register_cgi.cpp /home/eason/bit/myhttpd/sql_connect/sql_connect.cpp 
-	g++ -o $@ $^ $(FIND_PATH)
+	@g++ -o $@ $^ $(FIND_PATH)
 
 
 .PHONY:output
 output:
-	cp debug_cgi ../output/htdocs/cgi_bin 
-	cp math_cgi ../output/htdocs/cgi_bin 
-	cp div_cgi ../output/htdocs/cgi_bin 
-	cp show_student_cgi ../output/htdocs/cgi_bin
-	cp register_cgi ../output/htdocs/cgi_bin
+	@cp debug_cgi ../output/htdocs/cgi_bin 
+	@cp math_cgi ../output/htdocs/cgi_bin 
+	@cp div_cgi ../output/htdocs/cgi_bin 
+	@cp show_student_cgi ../output/htdocs/cgi_bin
+	@cp register_cgi ../output/htdocs/cgi_bin
 
 .PHONY:clean
 clean:
-	rm -rf debug_cgi math_cgi div_cgi show_student_cgi register_cgi
+	@rm -rf debug_cgi math_cgi div_cgi show_student_cgi register_cgi

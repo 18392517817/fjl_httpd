@@ -8,24 +8,31 @@
 
 #ifndef _HTTPD_H_
 #define _HTTPD_H_
-#include<stdio.h>
-#include<stdlib.h>
-#include<sys/types.h>
-#include<sys/socket.h>
-#include<string.h>
-#include<netinet/in.h>
-#include<arpa/inet.h>
-#include<errno.h>
-#include<pthread.h>
+#include<stdio.h>//
+#include<stdlib.h>//
+#include<sys/types.h>//
+#include<sys/socket.h>//
+#include<string.h>//
+#include<netinet/in.h>//
+#include<arpa/inet.h>//
+#include<errno.h>//
+#include<pthread.h>//
 #include<sys/wait.h>
 #include<sys/stat.h>
-//#include<string>
 #include<ctype.h>
-#include<unistd.h>
-#include<fcntl.h>
+#include<unistd.h>//
+#include<fcntl.h>//
+#include<sys/epoll.h>//
+#include<assert.h>
+#define MAX_EVENT_NUMBER 1024
 #define MAIN_PAGE "index.html"
-
 #define HTTP_VERSION "HTTP/1.0"
+typedef enum{false=0,true=!false} bool ;//boll
+
+typedef struct fds{
+	int epollfd;
+	int sockfd;
+}fds;
 
 void clear_header(int sock_client);
 void error_die(const char *sc);

@@ -16,17 +16,17 @@ FLAGS=-o
 LDFLAGS=-lpthread #-static
 LIB=
 
-.PHONY:alL
+.PHONY:all
 all:$(SER_BIN) $(CLI_BIN) cgi
 
 $(SER_BIN):$(SER_SRC)
-	$(CC) $(FLAGS) $@ $^ $(LDFLAGS) #-D_DEBUG_
+	$(CC) $(FLAGS) $@ $^ $(LDFLAGS)-D_EPOLL_ #-D_DEBUG_ _# -D_PTHREAD_
 $(CLI_BIN):$(CLI_SRC)
 	$(CC) $(FLAGS) $@ $^ $(LDFLAGS)
 
 .PHONY:cgi
 cgi:
-	for name in `echo $(CGI_PATH)`;\
+	@for name in `echo $(CGI_PATH)`;\
 	do\
 		cd $$name;\
 		make;\
@@ -35,14 +35,14 @@ cgi:
 
 .PHONY:output
 output: all
-	mkdir -p output/htdocs/cgi_bin
-	cp myhttpd output 
-	cp demo_client output
-	cp -rf conf output
-	cp -rf log output
-	cp start.sh output
-	cp -rf htdocs/* output/htdocs
-	for name in `echo $(CGI_PATH)`;\
+	@mkdir -p output/htdocs/cgi_bin
+	@cp myhttpd output 
+	@cp demo_client output
+	@cp -rf conf output
+	@cp -rf log output
+	@cp start.sh output
+	@cp -rf htdocs/* output/htdocs
+	@for name in `echo $(CGI_PATH)`;\
 	do\
 		cd $$name;\
 		make output;\
@@ -50,8 +50,8 @@ output: all
 	done
 .PHONY:clean
 clean:
-	rm -rf $(SER_BIN) $(CLI_BIN) output
-	for name in `echo $(CGI_PATH)`;\
+	@rm -rf $(SER_BIN) $(CLI_BIN) output
+	@for name in `echo $(CGI_PATH)`;\
 	do\
 		cd $$name;\
 		make clean;\

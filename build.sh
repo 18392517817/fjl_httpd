@@ -5,5 +5,4 @@ make clean;
 make output;
 
 
-cd output;
 

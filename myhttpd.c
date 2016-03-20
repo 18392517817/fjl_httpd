@@ -2,7 +2,7 @@
 	> File Name: myhttpd.c
 	> Author: fjl_57
 	> Mail: 799619622@qq.com 
-	> Created Time: Sun 06 Mar 2016 10:05:55 PM EST
+	> Created Time: Mon 14 Mar 2016 16:23:56 
 ************************************************************************/
 #include"myhttpd.h"
 #define SERVER_STRING "Server:jdbhttpd/1.0\r\n"
@@ -331,10 +331,17 @@ void *accept_request(void *arg)
 	memset(url,'\0',sizeof(url));
 	memset(buffer,'\0',sizeof(buffer));
 	memset(method,'\0',sizeof(method));
-
+#ifdef _EPOLL_
+	int sock_client = ( (fds*)arg )->sockfd;
+	int epollfd = ( (fds*)arg )->epollfd;
+	print_debug("start new thread to receive data on fd: ");
+//	printf("%d\n",sock_client);
+#endif
 	int cgi=0;
+#ifdef _PTHREAD_
 	int sock_client=(int)arg;
-        char * query_string=NULL;
+#endif   
+    char * query_string=NULL;
 
 	if(get_line(sock_client,buffer,sizeof(buffer))<0){
 		return (void*)-1;	
@@ -453,6 +460,29 @@ int start(int* port)
 	}
 	return listen_sock;
 }
+
+//set not blocking
+int setnonblocking(int fd)
+{
+	int old_option = fcntl(fd, F_GETFL);
+	int new_option = old_option | O_NONBLOCK;
+	fcntl(fd,F_SETFL, new_option);
+	return old_option;
+}
+//fd  EPOLLIN -> epollfd - epoll
+void addfd(int epollfd,int fd,bool oneshot)
+{
+	print_debug("enter addfd");
+	struct	epoll_event event;
+	event.data.fd = fd;
+	event.events = EPOLLIN | EPOLLET;
+	if(oneshot){
+		event.events |= EPOLLONESHOT ;
+	}
+	epoll_ctl(epollfd,EPOLL_CTL_ADD,fd,&event);
+	setnonblocking( fd );
+
+}
 //./httpd ip[] port
 int main(int argc,char *argv[])
 {
@@ -461,11 +491,54 @@ int main(int argc,char *argv[])
 	exit(1);
 	}
 	int port=atoi(argv[2]);
-	int sock=start(&port);
-	print_debug("start is success");	
 
+#ifdef _EPOLL_
+	//epoll 
+	int listensock=start(&port);
 	printf("httpd running on port :%d\n",port);	
+	struct	epoll_event events[MAX_EVENT_NUMBER];	
+	int epollfd=epoll_create(5);
+	if(epollfd==-1){
+		print_debug("epoll_create fail");
+        error_die(epoll_create);
+		return -1;
+	}
+	addfd(epollfd,listensock,false);
 	
+	while(1){
+		int ret = epoll_wait(epollfd,events,MAX_EVENT_NUMBER,-1);		
+		if( ret < 0 ){
+			print_debug("epoll_wait fail");
+			error_die(epoll_wait);
+			break;
+		}
+		int i=0;
+		for( ; i<ret; ++i){
+			int sockfd = events[i].data.fd;
+			if(sockfd == listensock){
+				struct sockaddr_in client_address;
+				socklen_t client_addrlength = sizeof(client_address);
+				int connfd = accept(listensock,(struct sockaddr*)&client_address,&client_addrlength);
+				addfd(epollfd,connfd,true);
+		
+			}else if(events[i].events & EPOLLIN){
+				print_debug("enter eles if");
+				pthread_t new_thread;
+			    fds fds_for_new_worker;
+				fds_for_new_worker.epollfd = epollfd;
+				fds_for_new_worker.sockfd = sockfd;
+				pthread_create( &new_thread, NULL, accept_request, (void *)&fds_for_new_worker);
+			}else{
+				printf("something else happended \n ");
+			}
+		}	
+		
+	}
+	close(epollfd);
+#endif
+#ifdef _PTHREAD_
+	int sock=start(&port);
+	printf("httpd running on port :%d\n",port);	
 	struct sockaddr_in client;
 	int  len = sizeof(client);
 	while(1){
@@ -482,5 +555,6 @@ int main(int argc,char *argv[])
 		print_debug("pthread_create is success");	
 	}
 	close(sock);
+#endif
 	return 0;
 }
