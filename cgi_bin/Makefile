@@ -1,4 +1,4 @@
-FIND_PATH=-I/home/eason/bit/myhttpd/sql_connect -I/home/eason/bit/myhttpd/sql_connect/mysql_lib/include -L/home/eason/bit/myhttpd/sql_connect/mysql_lib/lib -lmysqlclient
+FIND_PATH=-I/home/fujl/fjl/fjl_httpd/sql_connect -I/home/fujl/fjl/fjl_httpd/sql_connect/mysql_lib/include -L/home/fujl/fjl/fjl_httpd/sql_connect/mysql_lib/lib -lmysqlclient
 
 .PHONY:all
 all: debug_cgi math_cgi div_cgi show_student_cgi register_cgi
@@ -8,10 +8,10 @@ math_cgi:math_cgi.c
 	@gcc -o $@ $^
 div_cgi:div_cgi.c
 	@gcc -o $@ $^
-show_student_cgi:show_student_cgi.cpp /home/eason/bit/myhttpd/sql_connect/sql_connect.cpp 
+show_student_cgi:show_student_cgi.cpp /home/fujl/fjl/fjl_httpd/sql_connect/sql_connect.cpp 
 	@g++ -o $@ $^ $(FIND_PATH) -g
 
-register_cgi:register_cgi.cpp /home/eason/bit/myhttpd/sql_connect/sql_connect.cpp 
+register_cgi:register_cgi.cpp /home/fujl/fjl/fjl_httpd/sql_connect/sql_connect.cpp 
 	@g++ -o $@ $^ $(FIND_PATH)
 
 
